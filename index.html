@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaFX Proje Takvimi | Eğitim Müfredatı</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- İkonlar için -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --surface: #ffffff;
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            
+            /* Durum Renkleri */
+            --status-plan-bg: #f1f5f9;
+            --status-plan-text: #64748b;
+            --status-islem-bg: #fff7ed;
+            --status-islem-text: #ea580c;
+            --status-tamam-bg: #f0fdf4;
+            --status-tamam-text: #16a34a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        .dashboard-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Header Area */
+        .header {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .header-meta {
+            display: flex;
+            gap: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .header-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Progress Bar */
+        .progress-wrapper {
+            margin-top: 1rem;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-track {
+            height: 10px;
+            background-color: var(--border);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary);
+            width: 0%;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Timeline Layout */
+        .phase-section {
+            margin-bottom: 3rem;
+        }
+
+        .phase-header {
+            font-size: 1.25rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .timeline {
+            position: relative;
+            margin-left: 1rem;
+            padding-left: 2rem;
+            border-left: 2px dashed var(--border);
+        }
+
+        /* Lesson Cards */
+        .lesson-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .lesson-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+            transform: translateY(-2px);
+        }
+
+        /* Timeline Dot */
+        .lesson-card::before {
+            content: '';
+            position: absolute;
+            left: -37px; /* 2rem padding + 1px border - half dot */
+            top: 24px;
+            width: 14px;
+            height: 14px;
+            background: var(--surface);
+            border: 3px solid var(--primary);
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .lesson-date {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-color);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+        }
+
+        /* Interactive Status Badge */
+        .status-badge {
+            padding: 0.4rem 1rem;
+            border-radius: 99px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            border: 1px solid transparent;
+        }
+
+        .status-badge:active {
+            transform: scale(0.95);
+        }
+
+        .s-plan { background: var(--status-plan-bg); color: var(--status-plan-text); border-color: #e2e8f0; }
+        .s-islem { background: var(--status-islem-bg); color: var(--status-islem-text); border-color: #ffedd5; }
+        .s-tamam { background: var(--status-tamam-bg); color: var(--status-tamam-text); border-color: #dcfce7; }
+
+        .lesson-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.75rem;
+        }
+
+        .lesson-details {
+            list-style: none;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .lesson-details li {
+            position: relative;
+            padding-left: 1.25rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .lesson-details li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .timeline { margin-left: 0.5rem; padding-left: 1.5rem; }
+            .lesson-card::before { left: -29px; }
+            .header { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <!-- Header & Stats -->
+        <header class="header">
+            <h1>JavaFX Ekonomi Yönetimi Projesi</h1>
+            <div class="header-meta">
+                <span><i class="fa-regular fa-calendar-days"></i> Başlangıç: 30 Haziran</span>
+                <span><i class="fa-solid fa-flag-checkered"></i> Bitiş: 3 Eylül</span>
+                <span><i class="fa-solid fa-graduation-cap"></i> Haftada 2 Gün (Salı - Perşembe)</span>
+            </div>
+            
+            <div class="progress-wrapper">
+                <div class="progress-header">
+                    <span>Müfredat İlerlemesi</span>
+                    <span id="progress-text">0%</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Syllabus Content -->
+        <main id="syllabus">
+            
+            <!-- FAZ 1 -->
+            <section class="phase-section">
+                <h2 class="phase-header"><i class="fa-solid fa-layer-group"></i> Faz 1: Altyapı ve Veritabanı</h2>
+                <div class="timeline">
+                    
+                    <div class="lesson-card">
+                        <div class="card-header">
+                            <div class="lesson-date"><i class="fa-regular fa-clock"></i> 30 Haziran Salı</div>
+                            <div class="status-badge s-plan" data-id="1" onclick="toggleStatus(this)">Planlandı</div>
+                        </div>
+                        <h3 class="lesson-title">Ders 1: Proje Kurulumu ve Planlama</h3>
+                        <ul class="lesson-details">
+                            <li>Geliştirme ortamının (IDE) yapılandırılması.</li>
+                            <li>Maven `pom.xml` üzerinden SQLite JDBC bağımlılıklarının eklenmesi.</li>
+                            <li>Scene Builder entegrasyonu ve dizin mimarisinin (MVC) oluşturulması.</li>
+                        </ul>
+                    </div>
+
+                    <div class="lesson-card">
+                        <div class="card-header">
+                            <div class="lesson-date"><i class="fa-regular fa-clock"></i> 02 Temmuz Perşembe</div>
+                            <div class="status-badge s-plan" data-id="2" onclick="toggleStatus(this)">Planlandı</div>
+                        </div>
+                        <h3 class="lesson-title">Ders 2: SQLite Bağlantı Katmanı</h3>
+                        <ul class="lesson-details">
+                            <li>Varlıklar, Kategoriler ve İşlemler tablolarının DDL (SQL) kodlarının hazırlanması.</li>
+                            <li>Singleton mantığı ile `DatabaseHelper` sınıfının kodlanması.</li>
+                        </ul>
+                    </div>
+
+                    <div class="lesson-card">
+                        <div class="card-header">
+                            <div class="lesson-date"><i class="fa-regular fa-clock"></i> 07 Temmuz Salı</div>
+                            <div class="status-badge s-plan" data-id="3" onclick="toggleStatus(this)">Planlandı</div>
+                        </div>
+                        <h3 class="lesson-title">Ders 3: Model (Entity) Sınıfları</h3>
+                        <ul class="lesson-details">
+                            <li>Varlik, Kategori ve Islem nesnelerinin (POJO) oluşturulması.</li>
+                            <li>Kapsülleme (Encapsulation) kurallarına uygun metodların yazılması.</li>
+                        </ul>
+                    </div>
+
+                    <div class="lesson-card">
+                        <div class="card-header">
+                            <div class="lesson-date"><i class="fa-regular fa-clock"></i> 09 Temmuz Perşembe</div>
+                            <div class="status-badge s-plan" data-id="4" onclick="toggleStatus(this)">Planlandı</div>
+                        </div>
+                        <h3 class="lesson-title">Ders 4: DAO Tasarım Şablonu (Bölüm 1)</h3>
+                        <ul class="lesson-details">
+                            <li>Veri erişim katmanı için `VarlikDAO` sınıfının yazılması.</li>
+                            <li>Temel CRUD (Ekleme ve Listeleme) metotlarının JDBC ile implementasyonu.</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- FAZ 2 -->
+            <section class="phase-section">
+                <h2 class="phase-header"><i class="fa-solid fa-desktop"></i> Faz 2: İş Mantığı ve Kullanıcı Arayüzü (UI)</h2>
+                <div class="timeline">
+                    
+                    <div class="lesson-card">
+                        <div class="card-header">
+                            <div class="lesson-date"><i class="fa-regular fa-clock"></i> 14 Temmuz Salı</div>
+                            <div class="status-badge s-plan" data-id="5" onclick="toggleStatus(this)">Planlandı</div>
+                        </div>
+                        <h3 class="lesson-title">Ders 5: DAO Tasarım Şablonu (Bölüm 2)</h3>
+                        <ul class="lesson-details">
+                            <li>`IslemDAO` ve `KategoriDAO` sınıflarının geliştirilmesi.</li>
+                            <li>İlişkisel veri çekme (Join) sorgularına hazırlık.</li>
+                        </ul>
+                    </div>
+
+                    <div class="lesson-card">
+                        <div class="card-header">
+                            <div class="lesson-date"><i class="fa-regular fa-clock"></i> 16 Temmuz Perşembe</div>
+                            <div class="status-badge s-plan" data-id="6" onclick="toggleStatus(this)">Planlandı</div>
+                        </div>
+                        <h3 class="lesson-title">Ders 6: Master Layout Tasarımı</h3>
+                        <ul class="lesson-details">
+                            <li>Scene Builder'da uygulamanın ana iskeletinin oluşturulması.</li>
+                            <li>BorderPane yapısı, statik sol menü ve dinamik içerik alanının kurgulanması.</li>
+                        </ul>
+                    </div>
+
+                    <div class="lesson-card">
+                        <div class="card-header">
+                            <div class="lesson-date"><i class="fa-regular fa-clock"></i> 21 Temmuz Salı</div>
+                            <div class="status-badge s-plan" data-id="7" onclick="toggleStatus(this)">Planlandı</div>
+                        </div>
+                        <h3 class="lesson-title">Ders 7: Controller ve Sayfa Yönlendirmeleri</h3>
+                        <ul class="lesson-details">
+                            <li>Ana Controller sınıfının FXML ile bağlanması.</li>
+                            <li>Menü butonları arası geçişlerde "View Değiştirme" fonksiyonunun yazılması.</li>
+                        </ul>
+                    </div>
+
+                    <div class="lesson-card">
+                        <div class="card-header">
+                            <div class="lesson-date"><i class="fa-regular fa-clock"></i> 23 Temmuz Perşembe</div>
+                            <div class="status-badge s-plan" data-id="8" onclick="toggleStatus(this)">Planlandı</div>
+                        </div>
+                        <h3 class="lesson-title">Ders 8: Varlık Yönetimi Ekranı (UI)</h3>
+                        <ul class="lesson-details">
+                            <li>"Varlıklarım" sayfası için veri giriş formunun tasarlanması.</li>
+                            <li>Kayıtlı varlıkların gösterileceği JavaFX TableView bileşeninin eklenmesi.</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- FAZ 3 -->
+            <section class="phase-section">
+                <h2 class="phase-header"><i class="fa-solid fa-database"></i> Faz 3: Veri Akışı ve Entegrasyon</h2>
+                <div class="timeline">
+                    
+                    <div class="lesson-card">
+                        <div class="card-header">
+                            <div class="lesson-date"><i class="fa-regular fa-clock"></i> 28 Temmuz Salı</div>
+                            <div class="status-badge s-plan" data-id="9" onclick="toggleStatus(this)">Planlandı</div>
+                        </div>
+                        <h3 class="lesson-title">Ders 9: Varlık Verilerinin İşlenmesi</h3>
+                        <ul class="lesson-details">
+                            <li>Form verilerinin DAO katmanı üzerinden SQLite'a yazılması.</li>
+                            <li>TableView tablosunun `ObservableList` ile doldurulması.</li>
+                        </ul>
+                    </div>
+
+                    <div class="lesson-card">
+                        <div class="card-header">
+                            <div class="lesson-date"><i class="fa-regular fa-clock"></i> 30 Temmuz Perşembe</div>
+                            <div class="status-badge s-plan" data-id="10" onclick="toggleStatus(this)">Planlandı</div>
+                        </div>
+                        <h3 class="lesson-title">Ders 10: Silme, Güncelleme ve Validasyon</h3>
+                        <ul class="lesson-details">
+                            <li>Tablodan seçili kaydı veritabanından silme işlemi.</li>
+                            <li>Kullanıcı eksik veri girdiğinde çalışacak Alert (Uyarı) mekanizmaları.</li>
+                        </ul>
+                    </div>
+
+                    <div class="lesson-card">
+                        <div class="card-header">
+                            <div class="lesson-date"><i class="fa-regular fa-clock"></i> 04 Ağustos Salı</div>
+                            <div class="status-badge s-plan" data-id="11" onclick="toggleStatus(this)">Planlandı</div>
+                        </div>
+                        <h3 class="lesson-title">Ders 11: Finansal İşlem Ekranı Tasarımı</h3>
+                        <ul class="lesson-details">
+                            <li>Gelir/Gider ekleme sayfası için arayüz kurgusu.</li>
+                            <li>ComboBox, TextField ve DatePicker bileşenlerinin yerleşimi.</li>
+                        </ul>
+                    </div>
+
+                    <div class="lesson-card">
+                        <div class="card-header">
+                            <div class="lesson-date"><i class="fa-regular fa-clock"></i> 06 Ağustos Perşembe</div>
+                            <div class="status-badge s-plan" data-id="12" onclick="toggleStatus(this)">Planlandı</div>
+                        </div>
+                        <h3 class="lesson-title">Ders 12: Dinamik Veri Yükleme</h3>
+                        <ul class="lesson-details">
+                            <li>İşlem ekranı açılırken ComboBox'lara veritabanındaki kayıtlı Ev/Araç ve Kategorilerin otomatik yansıması.</li>
+                        </ul>
+                    </div>
+
+                    <div class="lesson-card">
+                        <div class="card-header">
+                            <div class="lesson-date"><i class="fa-regular fa-clock"></i> 11 Ağustos Salı</div>
+                            <div class="status-badge s-plan" data-id="13" onclick="toggleStatus(this)">Planlandı</div>
+                        </div>
+                        <h3 class="lesson-title">Ders 13: Gelir/Gider Kaydı ve Listeleme</h3>
+                        <ul class="lesson-details">
+                            <li>İşlem formunun kaydedilmesi.</li>
+                            <li>Tüm gelir ve giderlerin karmaşık bir TableView yapısında (Join kullanılarak) gösterilmesi.</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- FAZ 4 -->
+            <section class="phase-section">
+                <h2 class="phase-header"><i class="fa-solid fa-chart-pie"></i> Faz 4: Veri Analizi ve Grafikler</h2>
+                <div class="timeline">
+                    
+                    <div class="lesson-card">
+                        <div class="card-header">
+                            <div class="lesson-date"><i class="fa-regular fa-clock"></i> 13 Ağustos Perşembe</div>
+                            <div class="status-badge s-plan" data-id="14" onclick="toggleStatus(this)">Planlandı</div>
+                        </div>
+                        <h3 class="lesson-title">Ders 14: Analitik SQL Sorguları</h3>
+                        <ul class="lesson-details">
+                            <li>Raporlama için SUM() ve GROUP BY komutlarıyla özel SQL fonksiyonları yazılması.</li>
+                        </ul>
+                    </div>
+
+                    <div class="lesson-card">
+                        <div class="card-header">
+                            <div class="lesson-date"><i class="fa-regular fa-clock"></i> 18 Ağustos Salı</div>
+                            <div class="status-badge s-plan" data-id="15" onclick="toggleStatus(this)">Planlandı</div>
+                        </div>
+                        <h3 class="lesson-title">Ders 15: Dashboard Özet Kartları</h3>
+                        <ul class="lesson-details">
+                            <li>Ana sayfaya "Net Kasa", "Toplam Gider", "Toplam Gelir" göstergelerinin (Widget) eklenmesi.</li>
+                        </ul>
+                    </div>
+
+                    <div class="lesson-card">
+                        <div class="card-header">
+                            <div class="lesson-date"><i class="fa-regular fa-clock"></i> 20 Ağustos Perşembe</div>
+                            <div class="status-badge s-plan" data-id="16" onclick="toggleStatus(this)">Planlandı</div>
+                        </div>
+                        <h3 class="lesson-title">Ders 16: Pasta Grafik (PieChart)</h3>
+                        <ul class="lesson-details">
+                            <li>Harcama dağılımının (Kategorik bazda) JavaFX PieChart ile görselleştirilmesi.</li>
+                        </ul>
+                    </div>
+
+                    <div class="lesson-card">
+                        <div class="card-header">
+                            <div class="lesson-date"><i class="fa-regular fa-clock"></i> 25 Ağustos Salı</div>
+                            <div class="status-badge s-plan" data-id="17" onclick="toggleStatus(this)">Planlandı</div>
+                        </div>
+                        <h3 class="lesson-title">Ders 17: Çubuk Grafik (BarChart)</h3>
+                        <ul class="lesson-details">
+                            <li>Varlık başına düşen maliyet analizlerinin BarChart üzerinde gösterimi (Örn: A Evinin Masrafı vs B Aracının Masrafı).</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- FAZ 5 -->
+            <section class="phase-section">
+                <h2 class="phase-header"><i class="fa-solid fa-rocket"></i> Faz 5: İyileştirmeler ve Teslim</h2>
+                <div class="timeline">
+                    
+                    <div class="lesson-card">
+                        <div class="card-header">
+                            <div class="lesson-date"><i class="fa-regular fa-clock"></i> 27 Ağustos Perşembe</div>
+                            <div class="status-badge s-plan" data-id="18" onclick="toggleStatus(this)">Planlandı</div>
+                        </div>
+                        <h3 class="lesson-title">Ders 18: Veri Filtreleme ve Arama</h3>
+                        <ul class="lesson-details">
+                            <li>Finansal işlemler tablosunda tarihe ve kategoriye göre arama/filtreleme yapısı kurulması.</li>
+                        </ul>
+                    </div>
+
+                    <div class="lesson-card">
+                        <div class="card-header">
+                            <div class="lesson-date"><i class="fa-regular fa-clock"></i> 01 Eylül Salı</div>
+                            <div class="status-badge s-plan" data-id="19" onclick="toggleStatus(this)">Planlandı</div>
+                        </div>
+                        <h3 class="lesson-title">Ders 19: UI Makyajı (CSS) ve Bug Analizi</h3>
+                        <ul class="lesson-details">
+                            <li>JavaFX'e harici CSS bağlanarak uygulamanın modern bir arayüze kavuşturulması.</li>
+                            <li>Kullanıcı hatalarına karşı "Try-Catch" yapıları ile sistemin çökmez hale getirilmesi.</li>
+                        </ul>
+                    </div>
+
+                    <div class="lesson-card">
+                        <div class="card-header">
+                            <div class="lesson-date"><i class="fa-regular fa-clock"></i> 03 Eylül Perşembe</div>
+                            <div class="status-badge s-plan" data-id="20" onclick="toggleStatus(this)">Planlandı</div>
+                        </div>
+                        <h3 class="lesson-title">Ders 20: Uygulamanın Paketlenmesi (.jar / .exe)</h3>
+                        <ul class="lesson-details">
+                            <li>Yazılımın müşteri bilgisayarında çalışacak formata (Executable) dönüştürülmesi.</li>
+                            <li>Proje incelemesi ve kapanış.</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        // Durum (State) Yönetimi: 0=Planlandı, 1=İşleniyor, 2=Tamamlandı
+        const statuses = [
+            { class: 's-plan', text: '<i class="fa-regular fa-circle"></i> Planlandı' },
+            { class: 's-islem', text: '<i class="fa-solid fa-spinner fa-spin-pulse"></i> İşleniyor' },
+            { class: 's-tamam', text: '<i class="fa-solid fa-check"></i> Tamamlandı' }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            calculateProgress();
+        });
+
+        function toggleStatus(element) {
+            let currentData = JSON.parse(localStorage.getItem('courseSyllabusState')) || {};
+            let id = element.getAttribute('data-id');
+            
+            // Mevcut durumu al, yolsa 0 say
+            let currentState = currentData[id] !== undefined ? currentData[id] : 0;
+            
+            // Sonraki duruma geçiş (0 -> 1 -> 2 -> 0)
+            let nextState = (currentState + 1) % 3;
+            
+            // Kaydet
+            currentData[id] = nextState;
+            localStorage.setItem('courseSyllabusState', JSON.stringify(currentData));
+
+            // UI Güncelle
+            applyStatusUI(element, nextState);
+            calculateProgress();
+        }
+
+        function applyStatusUI(element, stateIndex) {
+            // Sınıfları temizle
+            element.classList.remove('s-plan', 's-islem', 's-tamam');
+            // Yeni sınıfı ve metni ekle
+            element.classList.add(statuses[stateIndex].class);
+            element.innerHTML = statuses[stateIndex].text;
+        }
+
+        function loadState() {
+            let currentData = JSON.parse(localStorage.getItem('courseSyllabusState')) || {};
+            let badges = document.querySelectorAll('.status-badge');
+            
+            badges.forEach(badge => {
+                let id = badge.getAttribute('data-id');
+                let state = currentData[id] !== undefined ? currentData[id] : 0;
+                applyStatusUI(badge, state);
+            });
+        }
+
+        function calculateProgress() {
+            let currentData = JSON.parse(localStorage.getItem('courseSyllabusState')) || {};
+            const totalLessons = 20;
+            let completedCount = 0;
+
+            for (let i = 1; i <= totalLessons; i++) {
+                if (currentData[i] === 2) {
+                    completedCount++;
+                }
+            }
+
+            let percentage = Math.round((completedCount / totalLessons) * 100);
+            
+            document.getElementById('progress-fill').style.width = percentage + '%';
+            document.getElementById('progress-text').innerText = `${percentage}% (${completedCount}/${totalLessons})`;
+        }
+    </script>
+</body>
+</html>
