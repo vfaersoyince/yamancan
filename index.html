@@ -1,647 +1,574 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JavaFX Ekonomi Yönetimi - Eğitim ve Proje Takip Dashboard'u</title>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #4F46E5;
-            --primary-hover: #4338CA;
-            --secondary: #10B981;
-            --bg-color: #F3F4F6;
-            --card-bg: #FFFFFF;
-            --text-main: #1F2937;
-            --text-muted: #6B7280;
-            --border-color: #E5E7EB;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gelir Gider — JavaFX Eğitim Takip</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f1a;
+      --surface: #12182b;
+      --surface2: #1a2238;
+      --border: #2a3555;
+      --text: #e8ecf4;
+      --muted: #8b95b0;
+      --accent: #3b82f6;
+      --gelir: #22c55e;
+      --gider: #ef4444;
+      --purple: #a78bfa;
+      --radius: 14px;
+      --shadow: 0 8px 32px rgba(0,0,0,.35);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: -1;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(59,130,246,.18), transparent),
+        radial-gradient(ellipse 60% 40% at 90% 10%, rgba(34,197,94,.1), transparent),
+        radial-gradient(ellipse 50% 30% at 50% 100%, rgba(167,139,250,.08), transparent);
+    }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 0 20px 80px; }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-        }
+    /* Hero */
+    .hero {
+      padding: 48px 0 32px;
+      text-align: center;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(59,130,246,.15);
+      border: 1px solid rgba(59,130,246,.3);
+      color: #93c5fd;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -.02em;
+      margin-bottom: 8px;
+    }
+    .hero p { color: var(--muted); font-size: 1.05rem; max-width: 560px; margin: 0 auto 28px; }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            line-height: 1.6;
-        }
+    /* Progress */
+    .progress-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 32px;
+    }
+    .progress-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; }
+    .progress-top h2 { font-size: 1rem; font-weight: 600; }
+    .progress-pct { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+    .bar-bg { height: 10px; background: var(--surface2); border-radius: 999px; overflow: hidden; }
+    .bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--gelir)); border-radius: 999px; width: 0%; transition: width .5s ease; }
+    .progress-sub { margin-top: 10px; font-size: 13px; color: var(--muted); }
 
-        /* Header & Sticky Progress */
-        header {
-            background-color: var(--card-bg);
-            padding: 2rem 1rem;
-            text-align: center;
-            border-bottom: 1px solid var(--border-color);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        }
+    /* Naming table */
+    .naming {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 32px;
+      overflow-x: auto;
+    }
+    .naming h2 { font-size: 1.1rem; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+    td code { font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--surface2); padding: 2px 8px; border-radius: 6px; color: #93c5fd; }
 
-        header h1 {
-            color: var(--primary);
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
+    /* Phase */
+    .faz { margin-bottom: 40px; }
+    .faz-header {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 20px; padding-bottom: 12px;
+      border-bottom: 2px solid var(--border);
+    }
+    .faz-num {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+    }
+    .faz-header h2 { font-size: 1.25rem; font-weight: 700; }
+    .faz-header span { color: var(--muted); font-size: 14px; }
 
-        header p {
-            color: var(--text-muted);
-            font-size: 1rem;
-            margin-bottom: 1.5rem;
-        }
+    /* Lesson card */
+    .ders {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 14px;
+      overflow: hidden;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .ders:hover { border-color: rgba(59,130,246,.4); }
+    .ders.tamamlandi { border-color: rgba(34,197,94,.4); }
+    .ders.tamamlandi .ders-baslik { background: rgba(34,197,94,.06); }
+    .ders-baslik {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 18px 20px; cursor: pointer; user-select: none;
+    }
+    .ders-no {
+      flex-shrink: 0; width: 44px; height: 44px; border-radius: 12px;
+      background: var(--surface2); display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 15px; color: var(--accent);
+    }
+    .ders.tamamlandi .ders-no { background: rgba(34,197,94,.15); color: var(--gelir); }
+    .ders-meta { flex: 1; min-width: 0; }
+    .ders-tarih { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    .ders-baslik h3 { font-size: 1.05rem; font-weight: 600; }
+    .ders-ozet { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .ders-aksiyon { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+    .btn-tamamla {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: inherit; transition: all .2s;
+    }
+    .btn-tamamla:hover { border-color: var(--gelir); color: var(--gelir); }
+    .ders.tamamlandi .btn-tamamla { background: rgba(34,197,94,.12); border-color: var(--gelir); color: var(--gelir); }
+    .chevron { color: var(--muted); transition: transform .25s; font-size: 18px; }
+    .ders.acik .chevron { transform: rotate(180deg); }
 
-        .progress-container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #E0E7FF;
-            border-radius: 999px;
-            height: 24px;
-            overflow: hidden;
-            position: relative;
-        }
+    .ders-icerik {
+      display: none; padding: 0 20px 22px 78px;
+      border-top: 1px solid var(--border);
+      animation: fadeIn .3s ease;
+    }
+    .ders.acik .ders-icerik { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 
-        .progress-bar {
-            background-color: var(--secondary);
-            height: 100%;
-            width: 0%;
-            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
+    .kriter {
+      background: rgba(59,130,246,.08); border-left: 3px solid var(--accent);
+      padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0;
+      font-size: 14px;
+    }
+    .kriter strong { color: #93c5fd; }
 
-        .progress-text-overlay {
-            position: absolute;
-            width: 100%;
-            text-align: center;
-            top: 50%;
-            transform: translateY(-50%);
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: var(--text-main);
-            mix-blend-mode: difference;
-            pointer-events: none;
-        }
+    .adimlar { list-style: none; counter-reset: adim; }
+    .adimlar > li {
+      counter-increment: adim;
+      position: relative; padding-left: 36px; margin-bottom: 18px;
+    }
+    .adimlar > li::before {
+      content: counter(adim);
+      position: absolute; left: 0; top: 2px;
+      width: 24px; height: 24px; border-radius: 8px;
+      background: var(--surface2); border: 1px solid var(--border);
+      font-size: 12px; font-weight: 700; color: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .adim-baslik { font-weight: 600; margin-bottom: 6px; font-size: 15px; }
+    .adim-detay { color: var(--muted); font-size: 14px; margin-bottom: 8px; }
 
-        /* Container & Grid */
-        .container {
-            max-width: 1000px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
+    pre {
+      background: #0d1117; border: 1px solid var(--border); border-radius: 10px;
+      padding: 14px 16px; overflow-x: auto; margin: 8px 0 4px;
+      font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.55;
+    }
+    code { font-family: 'JetBrains Mono', monospace; }
+    .etiketler { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .etiket {
+      font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 6px;
+      background: var(--surface2); border: 1px solid var(--border); color: var(--muted);
+    }
+    .etiket.sinif { color: #c4b5fd; border-color: rgba(167,139,250,.3); }
+    .etiket.dosya { color: #86efac; border-color: rgba(34,197,94,.3); }
+    .etiket.degisken { color: #fcd34d; border-color: rgba(252,211,77,.3); }
 
-        .phase-title {
-            font-size: 1.5rem;
-            color: var(--text-main);
-            margin: 2.5rem 0 1.5rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+    footer {
+      text-align: center; padding: 40px 20px; color: var(--muted); font-size: 13px;
+      border-top: 1px solid var(--border); margin-top: 40px;
+    }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        /* Cards (Lessons) */
-        .card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--border-color);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            border-color: var(--primary);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-        }
-
-        .date-badge {
-            background: #EEF2FF;
-            color: var(--primary);
-            padding: 0.25rem 0.75rem;
-            border-radius: 999px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .lesson-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--text-main);
-            margin-bottom: 1rem;
-        }
-
-        .lesson-details {
-            list-style: none;
-            flex-grow: 1;
-        }
-
-        .lesson-details li {
-            position: relative;
-            padding-left: 1.5rem;
-            margin-bottom: 0.75rem;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        .lesson-details li::before {
-            content: "\f105";
-            font-family: "FontAwesome";
-            position: absolute;
-            left: 0;
-            color: var(--primary);
-        }
-
-        /* Checkbox UI */
-        .checkbox-wrapper {
-            margin-top: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .checkbox-wrapper input[type="checkbox"] {
-            appearance: none;
-            background-color: #fff;
-            margin: 0;
-            font: inherit;
-            color: currentColor;
-            width: 1.5em;
-            height: 1.5em;
-            border: 2px solid var(--border-color);
-            border-radius: 0.25em;
-            display: grid;
-            place-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-        }
-
-        .checkbox-wrapper input[type="checkbox"]::before {
-            content: "";
-            width: 0.8em;
-            height: 0.8em;
-            transform: scale(0);
-            transition: 120ms transform ease-in-out;
-            box-shadow: inset 1em 1em white;
-            background-color: white;
-            transform-origin: center;
-            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
-        }
-
-        .checkbox-wrapper input[type="checkbox"]:checked {
-            background-color: var(--secondary);
-            border-color: var(--secondary);
-        }
-
-        .checkbox-wrapper input[type="checkbox"]:checked::before {
-            transform: scale(1);
-        }
-
-        .checkbox-label {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-main);
-            cursor: pointer;
-            user-select: none;
-        }
-
-        /* Completed State */
-        .card.completed {
-            background-color: #F9FAFB;
-            opacity: 0.8;
-        }
-        .card.completed .lesson-title {
-            text-decoration: line-through;
-            color: var(--text-muted);
-        }
-
-        footer {
-            text-align: center;
-            padding: 3rem 1rem;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-    </style>
+    @media (max-width: 640px) {
+      .ders-icerik { padding-left: 20px; }
+      .ders-baslik { flex-wrap: wrap; }
+    }
+  </style>
 </head>
 <body>
+<div class="wrap">
 
-    <header>
-        <h1><i class="fa-solid fa-wallet"></i> JavaFX Ekonomi Yönetimi</h1>
-        <p>30 Haziran - 3 Eylül | Haftada 2 Gün (Salı & Perşembe)</p>
-        
-        <div class="progress-container">
-            <div class="progress-bar" id="progressBar"></div>
-            <div class="progress-text-overlay" id="progressText">0% (0 / 20 Ders Tamamlandı)</div>
-        </div>
-    </header>
+  <header class="hero">
+    <div class="badge">30 Haziran – 3 Eylül · Salı & Perşembe</div>
+    <h1>JavaFX Gelir Gider</h1>
+    <p>20 derslik adım adım uygulama rehberi. Türkçe sınıf ve değişken isimleriyle nihai proje mimarisi.</p>
+  </header>
 
-    <div class="container">
-        <!-- FAZ 1 -->
-        <h2 class="phase-title"><i class="fa-solid fa-database"></i> Faz 1: Altyapı ve Veritabanı</h2>
-        <div class="grid">
-            <div class="card">
-                <div class="card-header">
-                    <span class="date-badge">30 Haziran Salı</span>
-                </div>
-                <h3 class="lesson-title">Ders 1: Proje Kurulumu ve Planlama</h3>
-                <ul class="lesson-details">
-                    <li>Geliştirme ortamının (IDE) yapılandırılması.</li>
-                    <li>Maven <code>pom.xml</code> üzerinden SQLite JDBC bağımlılıklarının eklenmesi.</li>
-                    <li>Scene Builder entegrasyonu ve MVC dizin mimarisinin oluşturulması.</li>
-                </ul>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="ders1" class="lesson-checkbox">
-                    <label for="ders1" class="checkbox-label">Dersi Tamamla</label>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <span class="date-badge">02 Temmuz Perşembe</span>
-                </div>
-                <h3 class="lesson-title">Ders 2: SQLite ve Veritabanı Tasarımı</h3>
-                <ul class="lesson-details">
-                    <li><b>Varlıklar</b> (id, ad, varlik_tipi), <b>Kategoriler</b> ve <b>İşlemler</b> tablolarının DDL kodları.</li>
-                    <li>Dinamik Logo ayarları için <b>Ayarlar</b> tablosunun (Key-Value) oluşturulması.</li>
-                    <li>Singleton mantığı ile <code>DatabaseHelper</code> sınıfının kodlanması.</li>
-                </ul>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="ders2" class="lesson-checkbox">
-                    <label for="ders2" class="checkbox-label">Dersi Tamamla</label>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <span class="date-badge">07 Temmuz Salı</span>
-                </div>
-                <h3 class="lesson-title">Ders 3: Model (Entity) Sınıfları</h3>
-                <ul class="lesson-details">
-                    <li>Varlik, Kategori, Islem ve <b>Ayar</b> nesnelerinin (POJO) oluşturulması.</li>
-                    <li>Kapsülleme (Encapsulation) kurallarına uygun Get/Set metodlarının yazılması.</li>
-                </ul>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="ders3" class="lesson-checkbox">
-                    <label for="ders3" class="checkbox-label">Dersi Tamamla</label>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <span class="date-badge">09 Temmuz Perşembe</span>
-                </div>
-                <h3 class="lesson-title">Ders 4: DAO Tasarım Şablonu (Bölüm 1)</h3>
-                <ul class="lesson-details">
-                    <li>Veri erişim katmanı için <code>VarlikDAO</code> ve <code>AyarDAO</code> sınıflarının yazılması.</li>
-                    <li>Temel CRUD (Ekleme, Okuma, Güncelleme, Silme) metotlarının JDBC ile implementasyonu.</li>
-                </ul>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="ders4" class="lesson-checkbox">
-                    <label for="ders4" class="checkbox-label">Dersi Tamamla</label>
-                </div>
-            </div>
-        </div>
-
-        <!-- FAZ 2 -->
-        <h2 class="phase-title"><i class="fa-solid fa-layer-group"></i> Faz 2: İş Mantığı ve Kullanıcı Arayüzü (UI)</h2>
-        <div class="grid">
-            <div class="card">
-                <div class="card-header">
-                    <span class="date-badge">14 Temmuz Salı</span>
-                </div>
-                <h3 class="lesson-title">Ders 5: DAO Tasarım Şablonu (Bölüm 2)</h3>
-                <ul class="lesson-details">
-                    <li><code>IslemDAO</code> ve <code>KategoriDAO</code> sınıflarının geliştirilmesi.</li>
-                    <li>İşlemler tablosunu varlıklar ve kategorilerle birleştirecek ilişkisel (Join) sorgulara hazırlık.</li>
-                </ul>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="ders5" class="lesson-checkbox">
-                    <label for="ders5" class="checkbox-label">Dersi Tamamla</label>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <span class="date-badge">16 Temmuz Perşembe</span>
-                </div>
-                <h3 class="lesson-title">Ders 6: Master Layout & Dinamik Logo</h3>
-                <ul class="lesson-details">
-                    <li>Scene Builder'da uygulamanın ana iskeletinin (BorderPane) kurgusu.</li>
-                    <li>Statik sol menü, Ayarlar butonu ve dinamik içerik alanının (Center) yaratılması.</li>
-                    <li>Logonun <code>AyarDAO</code> ile okunup arayüze basılması (UX Odaklı Karşılama).</li>
-                </ul>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="ders6" class="lesson-checkbox">
-                    <label for="ders6" class="checkbox-label">Dersi Tamamla</label>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <span class="date-badge">21 Temmuz Salı</span>
-                </div>
-                <h3 class="lesson-title">Ders 7: Controller ve Yönlendirmeler</h3>
-                <ul class="lesson-details">
-                    <li>Ana Controller sınıfının FXML ile veri bağlaması (Data Binding).</li>
-                    <li>Menü butonları arası geçişlerde pürüzsüz "View Değiştirme" fonksiyonunun yazılması.</li>
-                </ul>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="ders7" class="lesson-checkbox">
-                    <label for="ders7" class="checkbox-label">Dersi Tamamla</label>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <span class="date-badge">23 Temmuz Perşembe</span>
-                </div>
-                <h3 class="lesson-title">Ders 8: Varlık Yönetimi Ekranı (UI)</h3>
-                <ul class="lesson-details">
-                    <li>Ev, Araba, Dükkan veya Kişi (Örn: Oğlum) eklenebilmesi için giriş formu tasarımı.</li>
-                    <li>"Varlık Tipi" seçimi için ComboBox kullanımı (Esnek UI).</li>
-                    <li>Varlıkların listeleneceği TableView bileşeninin eklenmesi.</li>
-                </ul>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="ders8" class="lesson-checkbox">
-                    <label for="ders8" class="checkbox-label">Dersi Tamamla</label>
-                </div>
-            </div>
-        </div>
-
-        <!-- FAZ 3 -->
-        <h2 class="phase-title"><i class="fa-solid fa-rotate"></i> Faz 3: Veri Akışı ve Entegrasyon</h2>
-        <div class="grid">
-            <div class="card">
-                <div class="card-header">
-                    <span class="date-badge">28 Temmuz Salı</span>
-                </div>
-                <h3 class="lesson-title">Ders 9: Varlık Verilerinin İşlenmesi</h3>
-                <ul class="lesson-details">
-                    <li>Arayüzdeki form verilerinin DAO katmanı üzerinden SQLite'a yazılması.</li>
-                    <li>TableView tablosunun <code>ObservableList</code> ile reaktif şekilde doldurulması.</li>
-                </ul>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="ders9" class="lesson-checkbox">
-                    <label for="ders9" class="checkbox-label">Dersi Tamamla</label>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <span class="date-badge">30 Temmuz Perşembe</span>
-                </div>
-                <h3 class="lesson-title">Ders 10: Silme, Güncelleme ve Validasyon</h3>
-                <ul class="lesson-details">
-                    <li>Tablodan seçili kaydı veritabanından güvenli silme işlemi.</li>
-                    <li>Kullanıcı eksik veri girdiğinde çalışacak Alert (Uyarı) mekanizmaları (Hata Önleyici UX).</li>
-                </ul>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="ders10" class="lesson-checkbox">
-                    <label for="ders10" class="checkbox-label">Dersi Tamamla</label>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <span class="date-badge">04 Ağustos Salı</span>
-                </div>
-                <h3 class="lesson-title">Ders 11: Finansal İşlem & Ayarlar UI</h3>
-                <ul class="lesson-details">
-                    <li>Gelir/Gider ekleme sayfası için form kurgusu (ComboBox, TextField, DatePicker).</li>
-                    <li>Ayarlar sayfası: <code>FileChooser</code> ile bilgisayardan yeni logo seçtirme arayüzü.</li>
-                </ul>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="ders11" class="lesson-checkbox">
-                    <label for="ders11" class="checkbox-label">Dersi Tamamla</label>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <span class="date-badge">06 Ağustos Perşembe</span>
-                </div>
-                <h3 class="lesson-title">Ders 12: Dinamik Veri Yükleme</h3>
-                <ul class="lesson-details">
-                    <li>İşlem ekranı açılırken Varlıklar (Dükkan, Çocuk, Ev) ve Kategorilerin ComboBox'a otomatik gelmesi.</li>
-                    <li>Ayarlar ekranında seçilen logonun dosya yolunun kaydedilip anında UI'da güncellenmesi.</li>
-                </ul>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="ders12" class="lesson-checkbox">
-                    <label for="ders12" class="checkbox-label">Dersi Tamamla</label>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <span class="date-badge">11 Ağustos Salı</span>
-                </div>
-                <h3 class="lesson-title">Ders 13: Gelir/Gider Kaydı ve Listeleme</h3>
-                <ul class="lesson-details">
-                    <li>Seçilen Varlık (Kime/Nereye) ve Kategoriye (Ne tür) göre işlemin kaydedilmesi.</li>
-                    <li>Tüm işlemlerin "Hangi Varlık - Kategori - Tutar" formatında JOIN ile Listelenmesi.</li>
-                </ul>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="ders13" class="lesson-checkbox">
-                    <label for="ders13" class="checkbox-label">Dersi Tamamla</label>
-                </div>
-            </div>
-        </div>
-
-        <!-- FAZ 4 -->
-        <h2 class="phase-title"><i class="fa-solid fa-chart-pie"></i> Faz 4: Veri Analizi ve Grafikler</h2>
-        <div class="grid">
-            <div class="card">
-                <div class="card-header">
-                    <span class="date-badge">13 Ağustos Perşembe</span>
-                </div>
-                <h3 class="lesson-title">Ders 14: Analitik SQL Sorguları</h3>
-                <ul class="lesson-details">
-                    <li>Raporlama için SUM() ve GROUP BY komutlarıyla özel sorguların yazılması.</li>
-                    <li>Varlık bazlı ve kategori bazlı toplam hesaplayan metotların DAO'ya eklenmesi.</li>
-                </ul>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="ders14" class="lesson-checkbox">
-                    <label for="ders14" class="checkbox-label">Dersi Tamamla</label>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <span class="date-badge">18 Ağustos Salı</span>
-                </div>
-                <h3 class="lesson-title">Ders 15: Dashboard Özet Kartları</h3>
-                <ul class="lesson-details">
-                    <li>Ana sayfaya "Net Kasa", "Toplam Gider", "Toplam Gelir" widget'larının eklenmesi.</li>
-                    <li>Finansal durumun bir bakışta anlaşılmasını sağlayan UX bilgi mimarisi.</li>
-                </ul>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="ders15" class="lesson-checkbox">
-                    <label for="ders15" class="checkbox-label">Dersi Tamamla</label>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <span class="date-badge">20 Ağustos Perşembe</span>
-                </div>
-                <h3 class="lesson-title">Ders 16: Pasta Grafik (PieChart)</h3>
-                <ul class="lesson-details">
-                    <li>Harcama dağılımının (Eğitim %20, Mutfak %40 vb.) JavaFX PieChart ile görselleştirilmesi.</li>
-                    <li>Renk paletlerinin göz yormayacak şekilde CSS ile ayarlanması.</li>
-                </ul>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="ders16" class="lesson-checkbox">
-                    <label for="ders16" class="checkbox-label">Dersi Tamamla</label>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <span class="date-badge">25 Ağustos Salı</span>
-                </div>
-                <h3 class="lesson-title">Ders 17: Çubuk Grafik (BarChart)</h3>
-                <ul class="lesson-details">
-                    <li>Varlık bazlı analizlerin (A Evinin Getirisi vs Oğlumun Masrafı) BarChart ile kıyaslanması.</li>
-                    <li>Grafiklerin Hover (Üzerine gelme) animasyonlarının eklenmesi.</li>
-                </ul>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="ders17" class="lesson-checkbox">
-                    <label for="ders17" class="checkbox-label">Dersi Tamamla</label>
-                </div>
-            </div>
-        </div>
-
-        <!-- FAZ 5 -->
-        <h2 class="phase-title"><i class="fa-solid fa-rocket"></i> Faz 5: İyileştirmeler ve Teslim</h2>
-        <div class="grid">
-            <div class="card">
-                <div class="card-header">
-                    <span class="date-badge">27 Ağustos Perşembe</span>
-                </div>
-                <h3 class="lesson-title">Ders 18: Veri Filtreleme ve Arama</h3>
-                <ul class="lesson-details">
-                    <li>İşlemler tablosunda Kategoriye, Tarihe ve <b>Varlığa</b> göre arama/filtreleme yapısı.</li>
-                    <li>Dinamik tablo güncellemeleri (Anında arama sonuçları).</li>
-                </ul>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="ders18" class="lesson-checkbox">
-                    <label for="ders18" class="checkbox-label">Dersi Tamamla</label>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <span class="date-badge">01 Eylül Salı</span>
-                </div>
-                <h3 class="lesson-title">Ders 19: UI Makyajı (CSS) ve Bug Analizi</h3>
-                <ul class="lesson-details">
-                    <li>Harici CSS dosyası ile arayüzün modern, kurumsal bir tasarıma kavuşturulması.</li>
-                    <li>Kullanıcı hatalarına karşı "Try-Catch" bloklarıyla sistemin dayanıklı (Robust) hale getirilmesi.</li>
-                </ul>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="ders19" class="lesson-checkbox">
-                    <label for="ders19" class="checkbox-label">Dersi Tamamla</label>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <span class="date-badge">03 Eylül Perşembe</span>
-                </div>
-                <h3 class="lesson-title">Ders 20: Uygulama Paketlenmesi</h3>
-                <ul class="lesson-details">
-                    <li>Yazılımın müşteri bilgisayarında çalışacak formata (.jar / .exe) dönüştürülmesi.</li>
-                    <li>Veritabanı dışa aktarımı ve logonun dış ortamda test edilmesi. Final teslimi!</li>
-                </ul>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="ders20" class="lesson-checkbox">
-                    <label for="ders20" class="checkbox-label">Dersi Tamamla</label>
-                </div>
-            </div>
-        </div>
-
+  <div class="progress-card">
+    <div class="progress-top">
+      <h2>İlerleme Durumu</h2>
+      <span class="progress-pct" id="yuzde">0%</span>
     </div>
+    <div class="bar-bg"><div class="bar-fill" id="bar"></div></div>
+    <p class="progress-sub"><span id="sayac">0</span> / 20 ders tamamlandı</p>
+  </div>
 
-    <footer>
-        <p>Geliştirici Eğitim Takip Sistemi - Kullanıcı Deneyimi (UX) ve Modern JavaFX Mimarisiyle Hazırlanmıştır.</p>
-    </footer>
+  <section class="naming">
+    <h2>📋 Türkçe İsimlendirme Standardı</h2>
+    <table>
+      <thead><tr><th>Katman</th><th>Türkçe Sınıf</th><th>Dosya</th><th>Önemli Alanlar</th></tr></thead>
+      <tbody>
+        <tr><td>Giriş</td><td><code>Baslatici</code></td><td>Baslatici.java</td><td>—</td></tr>
+        <tr><td>Uygulama</td><td><code>AnaUygulama</code></td><td>AnaUygulama.java</td><td><code>anaPencere</code></td></tr>
+        <tr><td>Veritabanı</td><td><code>VeritabaniYardimcisi</code></td><td>VeritabaniYardimcisi.java</td><td><code>ornek</code>, <code>baglantiAl()</code></td></tr>
+        <tr><td>Model</td><td><code>HarcamaKalemi</code></td><td>HarcamaKalemi.java</td><td><code>kimlik</code>, <code>ad</code>, <code>kalemTipi</code></td></tr>
+        <tr><td>Model</td><td><code>GelirKaynagi</code></td><td>GelirKaynagi.java</td><td><code>kimlik</code>, <code>ad</code></td></tr>
+        <tr><td>Model</td><td><code>Kategori</code></td><td>Kategori.java</td><td><code>kimlik</code>, <code>ad</code>, <code>kategoriTipi</code></td></tr>
+        <tr><td>Model</td><td><code>Islem</code></td><td>Islem.java</td><td><code>tutar</code>, <code>tarih</code>, <code>not</code>, <code>islemTipi</code></td></tr>
+        <tr><td>DAO</td><td><code>HarcamaKalemiVeriErisimi</code></td><td>HarcamaKalemiVeriErisimi.java</td><td><code>ekle()</code>, <code>tumunuGetir()</code></td></tr>
+        <tr><td>DAO</td><td><code>IslemVeriErisimi</code></td><td>IslemVeriErisimi.java</td><td><code>ekleGelir()</code>, <code>filtreleGider()</code></td></tr>
+        <tr><td>Kontrolcü</td><td><code>AnaKontrolcu</code></td><td>AnaKontrolcu.java</td><td><code>icerikAlani</code>, <code>gorunumYukle()</code></td></tr>
+        <tr><td>Kontrolcü</td><td><code>OzetKontrolcu</code></td><td>OzetKontrolcu.java</td><td><code>lblToplamGelir</code>, <code>gelirGrafigi</code></td></tr>
+        <tr><td>Yardımcı</td><td><code>ArayuzYardimcisi</code></td><td>ArayuzYardimcisi.java</td><td><code>uyariGoster()</code>, <code>ayFiltresiNormalize()</code></td></tr>
+      </tbody>
+    </table>
+  </section>
 
-    <!-- JavaScript Katmanı -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const checkboxes = document.querySelectorAll('.lesson-checkbox');
-            const progressBar = document.getElementById('progressBar');
-            const progressText = document.getElementById('progressText');
-            const totalLessons = checkboxes.length;
+  <div id="dersler"></div>
 
-            // Sayfa yüklendiğinde Local Storage'dan verileri çek
-            checkboxes.forEach(checkbox => {
-                const isChecked = localStorage.getItem(checkbox.id) === 'true';
-                checkbox.checked = isChecked;
-                updateCardStyle(checkbox);
-            });
+  <footer>
+    Gelir Gider Eğitim Takip Sistemi · JavaFX + SQLite + MVC<br>
+    <a href="GELIR_GIDER_DERS_KURALLARI.md" style="color:var(--accent)">GELIR_GIDER_DERS_KURALLARI.md</a>
+  </footer>
+</div>
 
-            // İlerlemeyi İlk Açılışta Güncelle
-            updateProgress();
+<script>
+const DERSLER = [
+  /* FAZ 1 */
+  { faz:1, fazAd:"Altyapı ve Veritabanı", no:1, tarih:"30 Haziran Salı", baslik:"Proje Kurulumu ve Planlama",
+    ozet:"Maven, JavaFX, Baslatici, paket yapısı",
+    kriter:"Boş JavaFX penceresi Baslatici ile açılır.",
+    adimlar:[
+      { baslik:"Maven projesi oluştur", detay:"Proje adı: GelirGider. Java 17 seç.", kod:`<groupId>org.example</groupId>\n<artifactId>GelirGider</artifactId>`,
+        siniflar:[], dosyalar:["pom.xml"], degiskenler:[] },
+      { baslik:"Bağımlılıkları ekle", detay:"javafx-controls, javafx-fxml, sqlite-jdbc", kod:`<artifactId>javafx-controls</artifactId>\n<artifactId>sqlite-jdbc</artifactId>`,
+        siniflar:[], dosyalar:["pom.xml"], degiskenler:[] },
+      { baslik:"Baslatici sınıfını yaz", detay:"Giriş noktası. mainClass = org.example.Baslatici", kod:`public class Baslatici {\n  public static void main(String[] args) {\n    Application.launch(AnaUygulama.class, args);\n  }\n}`,
+        siniflar:["Baslatici","AnaUygulama"], dosyalar:["Baslatici.java"], degiskenler:["args"] },
+      { baslik:"AnaUygulama — boş pencere", detay:"extends Application, start(Stage anaPencere)", kod:`public class AnaUygulama extends Application {\n  @Override\n  public void start(Stage anaPencere) {\n    anaPencere.setTitle("Gelir Gider - Ekonomi Yönetimi");\n    anaPencere.show();\n  }\n}`,
+        siniflar:["AnaUygulama"], dosyalar:["AnaUygulama.java"], degiskenler:["anaPencere"] },
+      { baslik:"Paket yapısını kur", detay:"model, dao, veritabani, kontrolcu, yardimci", kod:`src/main/java/org/example/\n  model/ veritabani/ dao/ kontrolcu/ yardimci/\n  resources/fxml/ css/`,
+        siniflar:[], dosyalar:[], degiskenler:[] }
+    ]},
+  { faz:1, fazAd:"Altyapı ve Veritabanı", no:2, tarih:"2 Temmuz Perşembe", baslik:"SQLite ve Veritabanı Tasarımı",
+    ozet:"VeritabaniYardimcisi, tablolar, seed veri",
+    kriter:"gelirgider.db oluşur, tablolar hazır.",
+    adimlar:[
+      { baslik:"Singleton VeritabaniYardimcisi", detay:"Tek örnek (ornek), private constructor", kod:`public class VeritabaniYardimcisi {\n  private static VeritabaniYardimcisi ornek;\n  private static final String DB_YOLU = "jdbc:sqlite:gelirgider.db";\n  public static synchronized VeritabaniYardimcisi ornekAl() { ... }\n  public Connection baglantiAl() throws SQLException { ... }\n}`,
+        siniflar:["VeritabaniYardimcisi"], dosyalar:["VeritabaniYardimcisi.java"], degiskenler:["ornek","DB_YOLU"] },
+      { baslik:"harcama_kalemleri tablosu", detay:"Eski ad: varliklar", kod:`CREATE TABLE harcama_kalemleri (\n  kimlik INTEGER PRIMARY KEY AUTOINCREMENT,\n  ad TEXT NOT NULL,\n  kalem_tipi TEXT NOT NULL\n)`,
+        siniflar:[], dosyalar:["VeritabaniYardimcisi.java"], degiskenler:[] },
+      { baslik:"gelir_kaynaklari + kategoriler + islemler", detay:"Gelir: gelir_kaynagi_kimlik. Gider: harcama_kalemi_kimlik", kod:`CREATE TABLE islemler (\n  kimlik INTEGER PRIMARY KEY AUTOINCREMENT,\n  harcama_kalemi_kimlik INTEGER,\n  gelir_kaynagi_kimlik INTEGER,\n  kategori_kimlik INTEGER NOT NULL,\n  tutar REAL NOT NULL,\n  tarih TEXT NOT NULL,\n  not_metni TEXT,\n  islem_tipi TEXT NOT NULL\n)`,
+        siniflar:[], dosyalar:["VeritabaniYardimcisi.java"], degiskenler:[] },
+      { baslik:"ayarlar tablosu + varsayılan veri", detay:"logo_yolu, gider kategorileri, gizli Genel", kod:`INSERT OR IGNORE INTO kategoriler VALUES (9,'Genel','Gelir');`,
+        siniflar:[], dosyalar:["VeritabaniYardimcisi.java"], degiskenler:[] },
+      { baslik:"AnaUygulama.start içinde başlat", detay:"VeritabaniYardimcisi.ornekAl() çağrısı", kod:`VeritabaniYardimcisi.ornekAl();`,
+        siniflar:["AnaUygulama","VeritabaniYardimcisi"], dosyalar:["AnaUygulama.java"], degiskenler:[] }
+    ]},
+  { faz:1, fazAd:"Altyapı ve Veritabanı", no:3, tarih:"7 Temmuz Salı", baslik:"Model (Varlık) Sınıfları",
+    ozet:"POJO: HarcamaKalemi, GelirKaynagi, Kategori, Islem, Ayar",
+    kriter:"Tüm model sınıfları derlenir.",
+    adimlar:[
+      { baslik:"HarcamaKalemi modeli", detay:"private alanlar + getter/setter", kod:`public class HarcamaKalemi {\n  private int kimlik;\n  private String ad;\n  private String kalemTipi;\n}`,
+        siniflar:["HarcamaKalemi"], dosyalar:["HarcamaKalemi.java"], degiskenler:["kimlik","ad","kalemTipi"] },
+      { baslik:"GelirKaynagi modeli", detay:"Gelir kaynağı: Eczane, Kooperatif vb.", kod:`public class GelirKaynagi {\n  private int kimlik;\n  private String ad;\n}`,
+        siniflar:["GelirKaynagi"], dosyalar:["GelirKaynagi.java"], degiskenler:["kimlik","ad"] },
+      { baslik:"Kategori ve Ayar", detay:"kategoriTipi: Gelir veya Gider", kod:`public class Kategori {\n  private int kimlik;\n  private String ad;\n  private String kategoriTipi;\n}`,
+        siniflar:["Kategori","Ayar"], dosyalar:["Kategori.java","Ayar.java"], degiskenler:["kategoriTipi","anahtar","deger"] },
+      { baslik:"Islem modeli", detay:"JOIN alanları: gelirKaynagiAd, harcamaKalemiAd", kod:`public class Islem {\n  private int kimlik;\n  private int harcamaKalemiKimlik;\n  private int gelirKaynagiKimlik;\n  private double tutar;\n  private String tarih;\n  private String not;\n  private String islemTipi;\n}`,
+        siniflar:["Islem"], dosyalar:["Islem.java"], degiskenler:["tutar","tarih","not","islemTipi"] }
+    ]},
+  { faz:1, fazAd:"Altyapı ve Veritabanı", no:4, tarih:"9 Temmuz Perşembe", baslik:"DAO Tasarımı (Bölüm 1)",
+    ozet:"HarcamaKalemiVeriErisimi, GelirKaynagiVeriErisimi, AyarVeriErisimi",
+    kriter:"CRUD çalışır, konsol testi geçer.",
+    adimlar:[
+      { baslik:"HarcamaKalemiVeriErisimi", detay:"PreparedStatement ile ekle, tumunuGetir, guncelle, sil", kod:`public void ekle(HarcamaKalemi kalem) throws SQLException {\n  String sql = "INSERT INTO harcama_kalemleri (ad, kalem_tipi) VALUES (?, ?)";\n}`,
+        siniflar:["HarcamaKalemiVeriErisimi"], dosyalar:["HarcamaKalemiVeriErisimi.java"], degiskenler:["sql","kalem"] },
+      { baslik:"GelirKaynagiVeriErisimi", detay:"kullaniliyor(kimlik) metodu ekle", kod:`public boolean kullaniliyor(int kimlik) throws SQLException`,
+        siniflar:["GelirKaynagiVeriErisimi"], dosyalar:["GelirKaynagiVeriErisimi.java"], degiskenler:["kimlik"] },
+      { baslik:"AyarVeriErisimi", detay:"logoYolunuGetir(), logoYolunuKaydet(yol)", kod:`public String logoYolunuGetir() throws SQLException`,
+        siniflar:["AyarVeriErisimi"], dosyalar:["AyarVeriErisimi.java"], degiskenler:["logoYolu"] },
+      { baslik:"KategoriVeriErisimi", detay:"tipIleGetir(\"Gider\")", kod:`public List<Kategori> tipIleGetir(String kategoriTipi)`,
+        siniflar:["KategoriVeriErisimi"], dosyalar:["KategoriVeriErisimi.java"], degiskenler:["kategoriTipi"] }
+    ]},
+  /* FAZ 2 */
+  { faz:2, fazAd:"İş Mantığı ve Arayüz", no:5, tarih:"14 Temmuz Salı", baslik:"DAO Tasarımı (Bölüm 2) — IslemVeriErisimi",
+    ozet:"Gelir/gider ekleme, JOIN listeleme, özet sorgular",
+    kriter:"DAO üzerinden gelir ve gider kaydedilip listelenir.",
+    adimlar:[
+      { baslik:"ekleGelir()", detay:"gelir_kaynagi_kimlik kullanır", kod:`private void ekleGelir(Islem islem) {\n  // gelir_kaynagi_kimlik = islem.getGelirKaynagiKimlik()\n}`,
+        siniflar:["IslemVeriErisimi"], dosyalar:["IslemVeriErisimi.java"], degiskenler:["islem"] },
+      { baslik:"ekleGider()", detay:"harcama_kalemi_kimlik kullanır", kod:`private void ekleGider(Islem islem) { ... }`,
+        siniflar:["IslemVeriErisimi"], dosyalar:["IslemVeriErisimi.java"], degiskenler:[] },
+      { baslik:"filtreleGelir + filtreleGider", detay:"JOIN sorguları", kod:`SELECT i.*, g.ad AS gelir_kaynagi_ad\nFROM islemler i\nJOIN gelir_kaynaklari g ON ...`,
+        siniflar:["IslemVeriErisimi"], dosyalar:["IslemVeriErisimi.java"], degiskenler:["kaynakKimlik","tarih"] },
+      { baslik:"Özet metotları", detay:"toplamGelir, toplamGider, netKasa", kod:`public double netKasa() { return toplamGelir() - toplamGider(); }`,
+        siniflar:["IslemVeriErisimi"], dosyalar:["IslemVeriErisimi.java"], degiskenler:[] }
+    ]},
+  { faz:2, fazAd:"İş Mantığı ve Arayüz", no:6, tarih:"16 Temmuz Perşembe", baslik:"Ana Layout ve Dinamik Logo",
+    ozet:"ana.fxml, AnaKontrolcu, logo",
+    kriter:"Sol menü + içerik alanı + logo çalışır.",
+    adimlar:[
+      { baslik:"ana.fxml — BorderPane", detay:"Sol sidebar, orta StackPane", kod:`<BorderPane>\n  <left> ... menü butonları ... </left>\n  <center><StackPane fx:id="icerikAlani"/></center>\n</BorderPane>`,
+        siniflar:["AnaKontrolcu"], dosyalar:["ana.fxml"], degiskenler:["icerikAlani","logoGorseli"] },
+      { baslik:"Menü butonları", detay:"Özet, Gelirler, Giderler, Harcama Kalemleri, Ayarlar", kod:`btnOzet, btnGelirler, btnGiderler, btnHarcamaKalemleri, btnAyarlar`,
+        siniflar:["AnaKontrolcu"], dosyalar:["ana.fxml","AnaKontrolcu.java"], degiskenler:[] },
+      { baslik:"gorunumYukle(fxmlYolu)", detay:"FXMLLoader ile sayfa değiştirme", kod:`private void gorunumYukle(String fxmlYolu, Consumer<Object> yuklendi) { ... }`,
+        siniflar:["AnaKontrolcu"], dosyalar:["AnaKontrolcu.java"], degiskenler:["fxmlYolu","yukleyici"] },
+      { baslik:"stil.css sidebar", detay:"menu-btn, menu-btn-active sınıfları", kod:`.sidebar { -fx-background-color: #1e293b; }`,
+        siniflar:[], dosyalar:["stil.css"], degiskenler:[] }
+    ]},
+  { faz:2, fazAd:"İş Mantığı ve Arayüz", no:7, tarih:"21 Temmuz Salı", baslik:"Kontrolcü ve Yönlendirmeler",
+    ozet:"Tüm sayfa geçişleri, setAnaKontrolcu",
+    kriter:"Menü ve programatik sayfa açma çalışır.",
+    adimlar:[
+      { baslik:"Navigasyon metotları", detay:"ozetGoster, gelirleriGoster, giderleriGoster...", kod:`public void gelirEkleGoster(Islem islem) {\n  gorunumYukle("/fxml/gelir_ekle.fxml", k -> {\n    ((GelirEkleKontrolcu)k).anaKontrolcuAyarla(this);\n  });\n}`,
+        siniflar:["AnaKontrolcu"], dosyalar:["AnaKontrolcu.java"], degiskenler:["islem"] },
+      { baslik:"Aktif menü butonu", detay:"aktifMenuButonuAyarla(Button aktif)", kod:`private void aktifMenuButonuAyarla(Button aktif) { ... }`,
+        siniflar:["AnaKontrolcu"], dosyalar:["AnaKontrolcu.java"], degiskenler:["aktif"] },
+      { baslik:"Alt kontrolcülere bağlantı", detay:"anaKontrolcuAyarla(this) pattern", kod:`public void anaKontrolcuAyarla(AnaKontrolcu anaKontrolcu)`,
+        siniflar:["GelirKontrolcu","GiderKontrolcu"], dosyalar:[], degiskenler:["anaKontrolcu"] }
+    ]},
+  { faz:2, fazAd:"İş Mantığı ve Arayüz", no:8, tarih:"23 Temmuz Perşembe", baslik:"Harcama Kalemleri Ekranı",
+    ozet:"harcama_kalemleri.fxml, HarcamaKalemiKontrolcu",
+    kriter:"Kalem ekle/güncelle/sil çalışır.",
+    adimlar:[
+      { baslik:"FXML form + tablo", detay:"txtAd, cmbKalemTipi, tblKalemler", kod:`@FXML private TextField txtAd;\n@FXML private ComboBox<String> cmbKalemTipi;\n@FXML private TableView<HarcamaKalemi> tblKalemler;`,
+        siniflar:["HarcamaKalemiKontrolcu"], dosyalar:["harcama_kalemleri.fxml"], degiskenler:["txtAd","cmbKalemTipi","tblKalemler"] },
+      { baslik:"ObservableList", detay:"kalemListesi reaktif tablo", kod:`private ObservableList<HarcamaKalemi> kalemListesi = FXCollections.observableArrayList();`,
+        siniflar:["HarcamaKalemiKontrolcu"], dosyalar:["HarcamaKalemiKontrolcu.java"], degiskenler:["kalemListesi","seciliKalem"] },
+      { baslik:"Validasyon + silme onayı", detay:"Alert CONFIRMATION", kod:`if (seciliKalem == null) { ArayuzYardimcisi.uyariGoster("..."); return; }`,
+        siniflar:["HarcamaKalemiKontrolcu","ArayuzYardimcisi"], dosyalar:[], degiskenler:["seciliKalem"] }
+    ]},
+  /* FAZ 3 */
+  { faz:3, fazAd:"Veri Akışı ve Entegrasyon", no:9, tarih:"28 Temmuz Salı", baslik:"Gelir Listesi ve Ekleme",
+    ozet:"gelir.fxml, gelir_ekle.fxml, GelirKontrolcu, GelirEkleKontrolcu",
+    kriter:"Gelir kaydedilir ve listede görünür.",
+    adimlar:[
+      { baslik:"Gelir listesi", detay:"Tablo: Kaynak, Tutar, Tarih, Not", kod:`@FXML private TableView<Islem> tblGelirler;\n@FXML private ComboBox<GelirKaynagi> cmbFiltreKaynak;`,
+        siniflar:["GelirKontrolcu"], dosyalar:["gelir.fxml"], degiskenler:["tblGelirler","islemListesi"] },
+      { baslik:"Gelir ekleme formu", detay:"Kaynak + Tutar + Tarih + Not (kategori yok!)", kod:`@FXML private ComboBox<GelirKaynagi> cmbKaynak;\n@FXML private TextField txtTutar;\n@FXML private DatePicker dpTarih;\n@FXML private TextArea txtNot;`,
+        siniflar:["GelirEkleKontrolcu"], dosyalar:["gelir_ekle.fxml"], degiskenler:["cmbKaynak","txtTutar","txtNot"] },
+      { baslik:"Kaynak yönetimi paneli", detay:"lstKaynaklar + txtYeniKaynak", kod:`@FXML private ListView<GelirKaynagi> lstKaynaklar;`,
+        siniflar:["GelirEkleKontrolcu"], dosyalar:["GelirEkleKontrolcu.java"], degiskenler:["lstKaynaklar","txtYeniKaynak"] },
+      { baslik:"Kayıt", detay:"Gizli Genel kategori kimliği kullan", kod:`islem.setKategoriKimlik(kategoriVeriErisimi.varsayilanGelirKategoriKimlik());`,
+        siniflar:["GelirEkleKontrolcu","IslemVeriErisimi"], dosyalar:[], degiskenler:["islem","duzenlenenIslem"] }
+    ]},
+  { faz:3, fazAd:"Veri Akışı ve Entegrasyon", no:10, tarih:"30 Temmuz Perşembe", baslik:"Silme, Güncelleme ve Validasyon",
+    ozet:"Çift tık düzenleme, uyarılar",
+    kriter:"Gelir CRUD + validasyon tamam.",
+    adimlar:[
+      { baslik:"Çift tık düzenleme", detay:"tblGelirler.setOnMouseClicked", kod:`if (e.getClickCount() == 2 && seciliIslem != null) duzenle();`,
+        siniflar:["GelirKontrolcu"], dosyalar:["GelirKontrolcu.java"], degiskenler:["seciliIslem"] },
+      { baslik:"duzenle(Islem) form doldurma", detay:"GelirEkleKontrolcu.duzenle", kod:`public void duzenle(Islem islem) { duzenlenenIslem = islem; ... }`,
+        siniflar:["GelirEkleKontrolcu"], dosyalar:[], degiskenler:["duzenlenenIslem","lblBaslik"] },
+      { baslik:"Validasyon", detay:"ArayuzYardimcisi.uyariGoster — popup yok", kod:`if (cmbKaynak.getValue() == null) { ArayuzYardimcisi.uyariGoster("Kaynak seçin"); return false; }`,
+        siniflar:["ArayuzYardimcisi"], dosyalar:["ArayuzYardimcisi.java"], degiskenler:[] }
+    ]},
+  { faz:3, fazAd:"Veri Akışı ve Entegrasyon", no:11, tarih:"4 Ağustos Salı", baslik:"Gider Listesi ve Ekleme",
+    ozet:"gider.fxml, gider_ekle.fxml",
+    kriter:"Gider JOIN ile listelenir.",
+    adimlar:[
+      { baslik:"Gider listesi", detay:"Harcama Kalemi, Kategori, Tutar, Tarih, Not", kod:`@FXML private TableColumn<Islem, String> colHarcamaKalemi;`,
+        siniflar:["GiderKontrolcu"], dosyalar:["gider.fxml"], degiskenler:[] },
+      { baslik:"Gider ekleme formu", detay:"cmbHarcamaKalemi, cmbKategori, txtTutar, dpTarih, txtNot", kod:`@FXML private ComboBox<HarcamaKalemi> cmbHarcamaKalemi;`,
+        siniflar:["GiderEkleKontrolcu"], dosyalar:["gider_ekle.fxml"], degiskenler:["cmbHarcamaKalemi","cmbKategori"] },
+      { baslik:"Sağ panel — kalem ve kategori listeleri", detay:"lstKalemler, lstKategoriler", kod:`@FXML private ListView<HarcamaKalemi> lstKalemler;\n@FXML private ListView<Kategori> lstKategoriler;`,
+        siniflar:["GiderEkleKontrolcu"], dosyalar:["GiderEkleKontrolcu.java"], degiskenler:["txtYeniKalem","txtYeniKategori"] }
+    ]},
+  { faz:3, fazAd:"Veri Akışı ve Entegrasyon", no:12, tarih:"6 Ağustos Perşembe", baslik:"Dinamik Yükleme ve Ayarlar",
+    ozet:"FileChooser logo, initialize doldurma",
+    kriter:"Formlar dinamik, logo anında güncellenir.",
+    adimlar:[
+      { baslik:"initialize() veri yükleme", detay:"Her form açılışında ComboBox/ListView doldur", kod:`@FXML public void baslat() { kalemleriYukle(); kategorileriYukle(); }`,
+        siniflar:["GiderEkleKontrolcu"], dosyalar:[], degiskenler:[] },
+      { baslik:"Ayarlar — FileChooser", detay:"logoSec(), logoyuKaldir()", kod:`FileChooser dosyaSecici = new FileChooser();\nFile secilen = dosyaSecici.showOpenDialog(btnLogoSec.getScene().getWindow());`,
+        siniflar:["AyarlarKontrolcu"], dosyalar:["ayarlar.fxml","AyarlarKontrolcu.java"], degiskenler:["imgOnizleme","btnLogoSec"] },
+      { baslik:"logoYukle() anında güncelleme", detay:"AnaKontrolcu.logoYukle()", kod:`anaKontrolcu.logoYukle();`,
+        siniflar:["AnaKontrolcu","AyarlarKontrolcu"], dosyalar:[], degiskenler:[] }
+    ]},
+  { faz:3, fazAd:"Veri Akışı ve Entegrasyon", no:13, tarih:"11 Ağustos Salı", baslik:"Filtreleme ve Listeleme",
+    ozet:"Ay filtresi, kaynak/kalem filtreleri",
+    kriter:"Filtreler çalışır, Türkçe placeholder.",
+    adimlar:[
+      { baslik:"Ay filtresi normalize", detay:"06.2026 → 2026-06", kod:`public static String ayFiltresiNormalize(String giris) { ... }`,
+        siniflar:["ArayuzYardimcisi"], dosyalar:["ArayuzYardimcisi.java"], degiskenler:["giris"] },
+      { baslik:"Gelir filtresi", detay:"cmbFiltreKaynak + txtFiltreTarih", kod:`islemListesi.setAll(islemVeriErisimi.filtreleGelir(kaynakKimlik, tarih));`,
+        siniflar:["GelirKontrolcu"], dosyalar:["gelir.fxml"], degiskenler:["txtFiltreTarih"] },
+      { baslik:"Boş tablo mesajı", detay:"ArayuzYardimcisi.bosTabloMesaji", kod:`ArayuzYardimcisi.bosTabloMesaji(tblGelirler, "Henüz gelir kaydı yok...");`,
+        siniflar:["ArayuzYardimcisi"], dosyalar:[], degiskenler:[] }
+    ]},
+  /* FAZ 4 */
+  { faz:4, fazAd:"Veri Analizi ve Grafikler", no:14, tarih:"13 Ağustos Perşembe", baslik:"Analitik SQL Sorguları",
+    ozet:"SUM, GROUP BY, DAO analitik metotlar",
+    kriter:"Analitik metotlar doğru toplam döndürür.",
+    adimlar:[
+      { baslik:"kategoriBazliGiderToplam()", detay:"GROUP BY kategori", kod:`SELECT k.ad, SUM(i.tutar) FROM islemler i JOIN kategoriler k ... GROUP BY k.ad`,
+        siniflar:["IslemVeriErisimi"], dosyalar:["IslemVeriErisimi.java"], degiskenler:[] },
+      { baslik:"gelirKaynagiBazliToplam()", detay:"Gelir kaynağı analizi", kod:`SELECT g.ad, SUM(i.tutar) FROM gelir_kaynaklari g LEFT JOIN islemler i ...`,
+        siniflar:["IslemVeriErisimi"], dosyalar:[], degiskenler:[] },
+      { baslik:"harcamaKalemiBazliToplam()", detay:"Gider bazlı kalem analizi", kod:`public Map<String, Double> harcamaKalemiBazliToplam()`,
+        siniflar:["IslemVeriErisimi"], dosyalar:[], degiskenler:[] }
+    ]},
+  { faz:4, fazAd:"Veri Analizi ve Grafikler", no:15, tarih:"18 Ağustos Salı", baslik:"Özet Kartları",
+    ozet:"ozet.fxml, OzetKontrolcu, 3 finansal kart",
+    kriter:"Toplam Gelir, Gider, Net Kasa doğru.",
+    adimlar:[
+      { baslik:"ozet.fxml — 3 kart", detay:"lblToplamGelir, lblToplamGider, lblNetKasa", kod:`@FXML private Label lblToplamGelir;\n@FXML private Label lblToplamGider;\n@FXML private Label lblNetKasa;`,
+        siniflar:["OzetKontrolcu"], dosyalar:["ozet.fxml"], degiskenler:["lblNetKasa"] },
+      { baslik:"verileriYukle()", detay:"NumberFormat Türk Lirası", kod:`double net = islemVeriErisimi.netKasa();\nlblNetKasa.getStyleClass().add(net >= 0 ? "pozitif" : "negatif");`,
+        siniflar:["OzetKontrolcu"], dosyalar:["OzetKontrolcu.java"], degiskenler:["paraFormati"] }
+    ]},
+  { faz:4, fazAd:"Veri Analizi ve Grafikler", no:16, tarih:"20 Ağustos Perşembe", baslik:"Pasta Grafik (Gider)",
+    ozet:"PieChart — gider kategorileri",
+    kriter:"Pasta grafik giderleri gösterir.",
+    adimlar:[
+      { baslik:"PieChart bağlama", detay:"pastaGrafigi veri seti", kod:`@FXML private PieChart pastaGrafigi;\nObservableList<PieChart.Data> dilimler = FXCollections.observableArrayList();`,
+        siniflar:["OzetKontrolcu"], dosyalar:["ozet.fxml"], degiskenler:["pastaGrafigi","dilimler"] },
+      { baslik:"CSS renk paleti", detay:".default-color0.chart-pie", kod:`.default-color0.chart-pie { -fx-pie-color: #3b82f6; }`,
+        siniflar:[], dosyalar:["stil.css"], degiskenler:[] }
+    ]},
+  { faz:4, fazAd:"Veri Analizi ve Grafikler", no:17, tarih:"25 Ağustos Salı", baslik:"Çubuk Grafik (Gelir)",
+    ozet:"BarChart — gelir kaynakları",
+    kriter:"Çubuk grafik gelir kaynaklarını gösterir.",
+    adimlar:[
+      { baslik:"BarChart bağlama", detay:"gelirCubukGrafigi", kod:`@FXML private BarChart<String, Number> gelirCubukGrafigi;\nXYChart.Series<String, Number> seri = new XYChart.Series<>();`,
+        siniflar:["OzetKontrolcu"], dosyalar:["ozet.fxml"], degiskenler:["gelirCubukGrafigi","seri"] },
+      { baslik:"Animasyon", detay:"setAnimated(true)", kod:`gelirCubukGrafigi.setAnimated(true);`,
+        siniflar:["OzetKontrolcu"], dosyalar:[], degiskenler:[] }
+    ]},
+  /* FAZ 5 */
+  { faz:5, fazAd:"İyileştirmeler ve Teslim", no:18, tarih:"27 Ağustos Perşembe", baslik:"UX Cilası",
+    ozet:"ArayuzYardimcisi, ipuçları, sade menü",
+    kriter:"Akıcı Türkçe deneyim.",
+    adimlar:[
+      { baslik:"ArayuzYardimcisi tamamlama", detay:"bosTabloMesaji, bosListeMesaji, uyariGoster", kod:`public final class ArayuzYardimcisi { ... }`,
+        siniflar:["ArayuzYardimcisi"], dosyalar:["ArayuzYardimcisi.java"], degiskenler:[] },
+      { baslik:"ComboBox/ListView CSS", detay:"Metin görünürlüğü düzeltmesi", kod:`.combo-box .list-cell { -fx-text-fill: #1e293b; }`,
+        siniflar:[], dosyalar:["stil.css"], degiskenler:[] },
+      { baslik:"hint-text her sayfada", detay:"Kullanıcıya rehberlik", kod:`<Label styleClass="hint-text" text="..."/>`,
+        siniflar:[], dosyalar:["*.fxml"], degiskenler:[] }
+    ]},
+  { faz:5, fazAd:"İyileştirmeler ve Teslim", no:19, tarih:"1 Eylül Salı", baslik:"CSS ve Dayanıklılık",
+    ozet:"Kurumsal tema, try-catch",
+    kriter:"Modern görünüm, anlaşılır hatalar.",
+    adimlar:[
+      { baslik:"stil.css tam tema", detay:"sidebar, kartlar, btn-gelir, btn-gider", kod:`.btn-gelir { -fx-background-color: #16a34a; }`,
+        siniflar:[], dosyalar:["stil.css"], degiskenler:[] },
+      { baslik:"Try-catch blokları", detay:"SQLException, NumberFormatException", kod:`try { ... } catch (SQLException e) { ArayuzYardimcisi.uyariGoster("..."); }`,
+        siniflar:[], dosyalar:["*Kontrolcu.java"], degiskenler:[] }
+    ]},
+  { faz:5, fazAd:"İyileştirmeler ve Teslim", no:20, tarih:"3 Eylül Perşembe", baslik:"Paketleme ve Final Teslim",
+    ozet:"JAR, demo senaryosu",
+    kriter:"JAR çalışır, demo eksiksiz.",
+    adimlar:[
+      { baslik:"Maven shade JAR", detay:"mvn package", kod:`mvn package\njava -jar target/GelirGider-1.0-SNAPSHOT.jar`,
+        siniflar:["Baslatici"], dosyalar:["pom.xml"], degiskenler:[] },
+      { baslik:"Demo senaryosu", detay:"5 adımlık final test", kod:`1. Harcama kalemi: Yazlık\n2. Gelir kaynağı: Eczane → gelir kaydet\n3. Gider: Market kategorisi → gider kaydet\n4. Özet kontrol\n5. Logo değiştir`,
+        siniflar:[], dosyalar:[], degiskenler:[] }
+    ]}
+];
 
-            // Checkbox değişimlerini dinle
-            checkboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', (e) => {
-                    // Durumu Local Storage'a kaydet
-                    localStorage.setItem(e.target.id, e.target.checked);
-                    
-                    // Arayüzü Güncelle
-                    updateCardStyle(e.target);
-                    updateProgress();
-                });
-            });
+function render() {
+  const container = document.getElementById('dersler');
+  let currentFaz = 0;
+  let html = '';
+  DERSLER.forEach(d => {
+    if (d.faz !== currentFaz) {
+      currentFaz = d.faz;
+      html += `<section class="faz"><div class="faz-header"><div class="faz-num">${d.faz}</div><div><h2>Faz ${d.faz}: ${d.fazAd}</h2><span>${d.faz === 1 ? '4 ders' : d.faz === 2 ? '4 ders' : d.faz === 3 ? '5 ders' : d.faz === 4 ? '4 ders' : '3 ders'}</span></div></div>`;
+    }
+    const id = `ders-${d.no}`;
+    html += `<article class="ders" id="${id}" data-no="${d.no}">
+      <div class="ders-baslik" onclick="toggleDers(${d.no})">
+        <div class="ders-no">${d.no}</div>
+        <div class="ders-meta">
+          <div class="ders-tarih">${d.tarih}</div>
+          <h3>${d.baslik}</h3>
+          <div class="ders-ozet">${d.ozet}</div>
+        </div>
+        <div class="ders-aksiyon">
+          <button class="btn-tamamla" onclick="event.stopPropagation();tamamla(${d.no})">Dersi Tamamla</button>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="ders-icerik">
+        <div class="kriter"><strong>Ders sonu kriteri:</strong> ${d.kriter}</div>
+        <ol class="adimlar">`;
+    d.adimlar.forEach(a => {
+      html += `<li>
+        <div class="adim-baslik">${a.baslik}</div>
+        <div class="adim-detay">${a.detay}</div>`;
+      if (a.kod) html += `<pre><code>${esc(a.kod)}</code></pre>`;
+      if (a.siniflar.length || a.dosyalar.length || a.degiskenler.length) {
+        html += `<div class="etiketler">`;
+        a.siniflar.forEach(s => html += `<span class="etiket sinif">${s}</span>`);
+        a.dosyalar.forEach(f => html += `<span class="etiket dosya">${f}</span>`);
+        a.degiskenler.forEach(v => html += `<span class="etiket degisken">${v}</span>`);
+        html += `</div>`;
+      }
+      html += `</li>`;
+    });
+    html += `</ol></div></article>`;
+    if (d.no === 4 || d.no === 8 || d.no === 13 || d.no === 17 || d.no === 20) html += `</section>`;
+  });
+  container.innerHTML = html;
+  yukleDurum();
+}
 
-            function updateCardStyle(checkbox) {
-                const card = checkbox.closest('.card');
-                if (checkbox.checked) {
-                    card.classList.add('completed');
-                } else {
-                    card.classList.remove('completed');
-                }
-            }
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-            function updateProgress() {
-                const completedLessons = document.querySelectorAll('.lesson-checkbox:checked').length;
-                const percentage = Math.round((completedLessons / totalLessons) * 100);
-                
-                progressBar.style.width = percentage + '%';
-                progressText.innerHTML = `${percentage}% (${completedLessons} / ${totalLessons} Ders Tamamlandı)`;
-            }
-        });
-    </script>
+function toggleDers(no) {
+  document.getElementById(`ders-${no}`).classList.toggle('acik');
+}
+
+function tamamla(no) {
+  let done = JSON.parse(localStorage.getItem('gelirgider_dersler') || '[]');
+  if (!done.includes(no)) done.push(no);
+  else done = done.filter(n => n !== no);
+  localStorage.setItem('gelirgider_dersler', JSON.stringify(done));
+  yukleDurum();
+}
+
+function yukleDurum() {
+  const done = JSON.parse(localStorage.getItem('gelirgider_dersler') || '[]');
+  DERSLER.forEach(d => {
+    const el = document.getElementById(`ders-${d.no}`);
+    const btn = el.querySelector('.btn-tamamla');
+    if (done.includes(d.no)) {
+      el.classList.add('tamamlandi');
+      btn.textContent = '✓ Tamamlandı';
+    } else {
+      el.classList.remove('tamamlandi');
+      btn.textContent = 'Dersi Tamamla';
+    }
+  });
+  const pct = Math.round(done.length / 20 * 100);
+  document.getElementById('yuzde').textContent = pct + '%';
+  document.getElementById('bar').style.width = pct + '%';
+  document.getElementById('sayac').textContent = done.length;
+}
+
+render();
+</script>
 </body>
 </html>
